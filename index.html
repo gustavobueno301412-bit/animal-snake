@@ -11,154 +11,258 @@
             --board-bg: #222;
         }
 
+        /* Reset e bloqueio de seleção de texto */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         body {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; background-color: var(--bg); color: white;
-            font-family: 'Segoe UI', Tahoma, sans-serif; touch-action: manipulation; overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+            touch-action: none; /* Bloqueia o "puxar para atualizar" do navegador */
         }
 
-        .game-title {
-            font-size: 24px; font-weight: bold; color: var(--primary); margin-top: 5px;
-            text-shadow: 2px 2px #000; letter-spacing: 2px;
+        .header {
+            width: 100%;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            border-bottom: 2px solid #444;
+            z-index: 100;
         }
 
-        .animal-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
-            background: #333; padding: 8px; border-radius: 12px; margin: 5px;
-            max-height: 90px; overflow-y: auto; width: 90vw; border: 2px solid #444;
-        }
-        .animal-grid button {
-            font-size: 18px; background: #444; border: none; border-radius: 8px;
-            padding: 5px; cursor: pointer;
+        .btn-top {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 13px;
         }
 
-        .stats { font-size: 18px; font-weight: bold; margin: 5px 0; color: var(--primary); }
+        .btn-pause { background: #f39c12; box-shadow: 0 3px #a3690b; }
+        .btn-reset { background: #e74c3c; box-shadow: 0 3px #962d22; }
 
-        #game-container { position: relative; }
+        /* Seletor de Animais - CORRIGIDO O SCROLL */
+        .animal-selector {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto; /* Permite scroll horizontal */
+            border-bottom: 1px solid #444;
+            touch-action: pan-x; /* Libera o dedo para deslizar apenas aqui */
+            -webkit-overflow-scrolling: touch;
+        }
        
+        .animal-selector button {
+            flex: 0 0 50px;
+            height: 50px;
+            font-size: 26px;
+            background: #444;
+            border: 2px solid #555;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .stats {
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
         #game-board {
-            width: 300px; height: 300px; background-color: var(--board-bg);
-            border: 4px solid #444; display: grid;
-            grid-template-columns: repeat(20, 1fr); grid-template-rows: repeat(20, 1fr);
-            image-rendering: pixelated;
-        }
-
-        /* Telas de Aviso */
-        #message-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10; text-align: center;
-            padding: 20px; box-sizing: border-box;
-        }
-        #message-screen h2 { color: var(--primary); margin-bottom: 15px; }
-
-        .cell { width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .snake-part { font-size: 16px; position: absolute; }
-        .food-item { font-size: 12px; position: absolute; }
-
-        /* Controles - Subindo o D-Pad */
-        .game-controls { margin-top: 10px; display: flex; gap: 8px; }
-        .game-controls button, .btn-main {
-            padding: 8px 15px; border-radius: 8px; border: none;
-            font-weight: bold; cursor: pointer; text-transform: uppercase;
-        }
-        .btn-pause { background-color: #f39c12; color: white; }
-        .btn-reset { background-color: #e74c3c; color: white; }
-        .btn-main { background-color: #2ecc71; color: white; margin-top: 10px; }
-
-        .dpad {
-            margin-top: 15px;
-            margin-bottom: 40px; /* DISTÂNCIA DA BORDA DO CELULAR */
+            width: 320px;
+            height: 320px;
+            background-color: var(--board-bg);
+            border: 4px solid #444;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+            border-radius: 5px;
             position: relative;
-            width: 140px;
-            height: 140px;
         }
+
+        /* TAMANHOS: Predador vs Presa */
+        .cell { position: relative; display: flex; align-items: center; justify-content: center; }
+       
+        /* O Predador (Snake) agora é maior */
+        .snake-part {
+            font-size: 22px; /* Aumentado */
+            position: absolute;
+            z-index: 2;
+        }
+       
+        /* A Presa (Comida) agora é menor */
+        .food-item {
+            font-size: 14px; /* Reduzido */
+            position: absolute;
+            z-index: 1;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Direcional */
+        .controls-area {
+            margin-top: auto;
+            margin-bottom: 30px;
+            position: relative;
+            width: 170px;
+            height: 170px;
+            touch-action: none;
+        }
+
         .dbtn {
-            position: absolute; width: 45px; height: 45px; background-color: #444;
-            border: 2px solid #666; color: white; font-size: 20px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 12px; cursor: pointer;
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            background: #333;
+            border: 2px solid #666;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            box-shadow: 0 4px #000;
         }
-        .up { top: 0; left: 47px; } .down { bottom: 0; left: 47px; }
-        .left { top: 47px; left: 0; } .right { top: 47px; right: 0; }
+
+        .up { top: 0; left: 56px; }
+        .down { bottom: 0; left: 56px; }
+        .left { top: 56px; left: 0; }
+        .right { top: 56px; right: 0; }
+
+        #game-over {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <div class="game-title">🐍LINK UP ANIMAL SNAKE🐍</div>
-    <div class="animal-grid" id="menu"></div>
-    <div class="stats">Nível: <span id="level">1</span> | Pontos: <span id="score">0</span></div>
+    <div class="header">
+        <button class="btn-top btn-pause" id="pauseBtn" onclick="togglePause()">PAUSE</button>
+        <span style="font-weight: bold; color: var(--primary)">SNAKE PRO</span>
+        <button class="btn-top btn-reset" onclick="resetGame()">RESET</button>
+    </div>
 
-    <div id="game-container">
+    <div class="animal-selector" id="menu"></div>
+
+    <div class="stats">
+        Pontos: <span id="score">0</span> | Nível: <span id="level">1</span>
+    </div>
+
+    <div style="position: relative;">
         <div id="game-board"></div>
-        <div id="message-screen">
-            <h2 id="msg-text">BEM-VINDO!</h2>
-            <p id="msg-score" style="display:none">Pontos: 0</p>
-            <button class="btn-main" onclick="startGame()" id="startBtn">INICIAR JOGO</button>
+        <div id="game-over">
+            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
+            <p>Score: <span id="finalScore">0</span></p>
+            <button class="btn-top btn-pause" onclick="resetGame()">REINICIAR</button>
         </div>
     </div>
 
-    <div class="game-controls">
-        <button class="btn-pause" onclick="togglePause()" id="pauseBtn">PAUSE</button>
-        <button class="btn-reset" onclick="resetGame()">RESET</button>
-    </div>
-
-    <div class="dpad">
-        <div class="dbtn up" onclick="handleDir('up')">▲</div>
-        <div class="dbtn left" onclick="handleDir('left')">◀</div>
-        <div class="dbtn right" onclick="handleDir('right')">▶</div>
-        <div class="dbtn down" onclick="handleDir('down')">▼</div>
+    <div class="controls-area">
+        <div class="dbtn up" data-dir="up">▲</div>
+        <div class="dbtn left" data-dir="left">◀</div>
+        <div class="dbtn right" data-dir="right">▶</div>
+        <div class="dbtn down" data-dir="down">▼</div>
     </div>
 
     <script>
         const board = document.getElementById('game-board');
         const menu = document.getElementById('menu');
-        const messageScreen = document.getElementById('message-screen');
-        const msgText = document.getElementById('msg-text');
-        const msgScore = document.getElementById('msg-score');
-        const pauseBtn = document.getElementById('pauseBtn');
-
+       
         const animalData = {
             '👨': { f: '🌭', b: '🟦' }, '🚘': { f: '⛽', b:'🟥' }, '👶': { f: '🍼', b: '❄️' },
             '🐶': { f: '🦴', b: '🟫' }, '🐱': { f: '🐭', b: '🟧' }, '🦁': { f: '🥩', b: '🟨' },
             '🐯': { f: '🥩', b: '🟧' }, '🐺': { f: '🥩', b: '⬜' }, '🐸': { f: '🪰', b: '🟩' },
-            '🐻': { f: '🐟', b: '🟫' }, '🐻‍❄️': { f: '🐟', b: '⬜' }, '🐨': { f: '🌿', b: '⬜' },
+            '🐻': { f: '🐟', b: '🟫' }, '🛵': { f: '📦', b: '🟨' }, '🐨': { f: '🌿', b: '⬜' },
             '🐼': { f: '🎋', b: '⬜' }, '🐹': { f: '🌻', b: '🟧' }, '🐰': { f: '🥕', b: '⬜' },
-            'FOX': { f: '🍗', b: '🟧' }, '🐮': { f: '🌿', b: '⬜' }, '🐷': { f: '🍎', b: '🌸' },
+            '🦊': { f: '🍗', b: '🟧' }, '🐮': { f: '🌿', b: '⬜' }, '🐷': { f: '🍎', b: '🌸' },
             '🐵': { f: '🍌', b: '🟫' }, '🐲': { f: '🔥', b: '🟥' }, '🐭': { f: '🧀', b: '⬜' },
             '😾': { f: '🐭', b: '🟧' }
         };
 
-        let currentAnimal = '👨', size = 20, snake = [{x: 10, y: 10}];
-        let food = {x: 5, y: 5}, direction = {x: 0, y: 0}, lastDir = {x: 0, y: 0};
-        let score = 0, level = 1, speed = 250, isPaused = true, gameStarted = false;
+        let currentAnimal = '👨', snake = [{x: 10, y: 10}], food = {x: 5, y: 5};
+        let direction = {x: 0, y: 0}, lastDir = {x: 0, y: 0};
+        let score = 0, level = 1, speed = 250, isPaused = false, isGameOver = false;
 
+        // Criar Menu com suporte a clique e toque
         Object.keys(animalData).forEach(emoji => {
             const btn = document.createElement('button');
             btn.innerText = emoji;
-            btn.onclick = () => { currentAnimal = emoji; resetGame(); };
+            const selectAnimal = (e) => {
+                e.stopPropagation();
+                currentAnimal = emoji;
+                resetGame();
+            };
+            btn.addEventListener('click', selectAnimal);
+            btn.addEventListener('touchstart', (e) => e.stopPropagation()); // Deixa o scroll fluir
             menu.appendChild(btn);
         });
 
+        // Controles de Direção
+        document.querySelectorAll('.dbtn').forEach(btn => {
+            const handleDirection = (e) => {
+                e.preventDefault();
+                const d = btn.getAttribute('data-dir');
+                changeDir(d);
+            };
+            btn.addEventListener('touchstart', handleDirection, {passive: false});
+            btn.addEventListener('mousedown', handleDirection);
+        });
+
+        function changeDir(dir) {
+            if (isPaused || isGameOver) return;
+            if (dir === 'up' && lastDir.y !== 1) direction = {x: 0, y: -1};
+            if (dir === 'down' && lastDir.y !== -1) direction = {x: 0, y: 1};
+            if (dir === 'left' && lastDir.x !== 1) direction = {x: -1, y: 0};
+            if (dir === 'right' && lastDir.x !== -1) direction = {x: 1, y: 0};
+        }
+
         function createBoard() {
             board.innerHTML = '';
-            const config = animalData[currentAnimal];
-            for (let y = 0; y < size; y++) {
-                for (let x = 0; x < size; x++) {
+            const config = animalData[currentAnimal] || animalData['👨'];
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 20; x++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     if (x === food.x && y === food.y) {
-                        const foodEl = document.createElement('span');
-                        foodEl.className = 'food-item';
-                        foodEl.innerText = config.f;
-                        cell.appendChild(foodEl);
+                        cell.innerHTML = `<span class="food-item">${config.f}</span>`;
                     } else {
-                        const part = snake.find(p => p.x === x && p.y === y);
-                        if (part) {
-                            const partEl = document.createElement('span');
-                            partEl.className = 'snake-part';
-                            partEl.innerText = (part === snake[0]) ? currentAnimal : config.b;
-                            cell.appendChild(partEl);
+                        const partIdx = snake.findIndex(p => p.x === x && p.y === y);
+                        if (partIdx !== -1) {
+                            cell.innerHTML = `<span class="snake-part">${partIdx === 0 ? currentAnimal : config.b}</span>`;
                         }
                     }
                     board.appendChild(cell);
@@ -166,90 +270,55 @@
             }
         }
 
-        function handleDir(dir) {
-            if (isPaused && gameStarted) return;
-            if (!gameStarted) startGame();
-           
-            if (dir === 'up' && lastDir.y !== 1) direction = {x: 0, y: -1};
-            if (dir === 'down' && lastDir.y !== -1) direction = {x: 0, y: 1};
-            if (dir === 'left' && lastDir.x !== 1) direction = {x: -1, y: 0};
-            if (dir === 'right' && lastDir.x !== -1) direction = {x: 1, y: 0};
-        }
-
-        function startGame() {
-            messageScreen.style.display = 'none';
-            isPaused = false;
-            gameStarted = true;
-        }
-
-        function togglePause() {
-            if (!gameStarted) return;
-            isPaused = !isPaused;
-            pauseBtn.innerText = isPaused ? "VOLTAR" : "PAUSE";
-            if (isPaused) {
-                msgText.innerText = "JOGO PAUSADO";
-                msgScore.style.display = 'none';
-                messageScreen.style.display = 'flex';
-                document.getElementById('startBtn').innerText = "CONTINUAR";
-            } else {
-                messageScreen.style.display = 'none';
-            }
-        }
-
-        function resetGame() {
-            snake = [{x: 10, y: 10}]; direction = {x: 0, y: 0}; lastDir = {x: 0, y: 0};
-            score = 0; level = 1; speed = 250;
-            isPaused = true; gameStarted = false;
-            document.getElementById('score').innerText = "0";
-            document.getElementById('level').innerText = "1";
-            msgText.innerText = "VAMOS JOGAR?";
-            msgScore.style.display = 'none';
-            document.getElementById('startBtn').innerText = "INICIAR";
-            messageScreen.style.display = 'flex';
-            generateFood(); createBoard();
-        }
-
         function update() {
-            if (!isPaused && gameStarted && (direction.x !== 0 || direction.y !== 0)) {
+            if (!isPaused && !isGameOver && (direction.x !== 0 || direction.y !== 0)) {
                 lastDir = direction;
                 const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
 
-                if (head.x < 0 || head.x >= size || head.y < 0 || head.y >= size ||
-                    snake.slice(1).find(p => p.x === head.x && p.y === head.y)) {
-                   
-                    // Game Over Real
-                    gameStarted = false;
-                    isPaused = true;
-                    msgText.innerText = "FIM DE JOGO!";
-                    msgScore.innerText = "Pontos: " + score;
-                    msgScore.style.display = 'block';
-                    document.getElementById('startBtn').innerText = "JOGAR NOVAMENTE";
-                    messageScreen.style.display = 'flex';
+                if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 ||
+                    snake.find(p => p.x === head.x && p.y === head.y)) {
+                    isGameOver = true;
+                    document.getElementById('finalScore').innerText = score;
+                    document.getElementById('game-over').style.display = 'flex';
                     return;
-
-                } else {
-                    snake.unshift(head);
-                    if (head.x === food.x && head.y === food.y) {
-                        score += 10;
-                        if (score % 50 === 0) { level++; speed = Math.max(50, speed - 30); }
-                        document.getElementById('score').innerText = score;
-                        document.getElementById('level').innerText = level;
-                        generateFood();
-                    } else { snake.pop(); }
                 }
+
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) {
+                    score += 10;
+                    if (score % 30 === 0) { level++; speed = Math.max(70, speed - 20); }
+                    document.getElementById('score').innerText = score;
+                    document.getElementById('level').innerText = level;
+                    generateFood();
+                } else { snake.pop(); }
             }
             createBoard();
             setTimeout(update, speed);
         }
 
         function generateFood() {
-            food = { x: Math.floor(Math.random() * size), y: Math.floor(Math.random() * size) };
+            food = { x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20) };
             if (snake.find(p => p.x === food.x && p.y === food.y)) generateFood();
         }
 
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').innerText = isPaused ? "VOLTAR" : "PAUSE";
+        }
+
+        function resetGame() {
+            snake = [{x: 10, y: 10}]; direction = {x: 0, y: 0}; lastDir = {x: 0, y: 0};
+            score = 0; level = 1; speed = 250; isPaused = false; isGameOver = false;
+            document.getElementById('score').innerText = "0";
+            document.getElementById('level').innerText = "1";
+            document.getElementById('game-over').style.display = 'none';
+            generateFood();
+            createBoard();
+        }
+
+        generateFood();
         update();
     </script>
 </body>
 </html>
 
- 
