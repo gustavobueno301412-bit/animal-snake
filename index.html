@@ -11,7 +11,6 @@
             --board-bg: #222;
         }
 
-        /* Reset e bloqueio de seleção de texto */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -29,7 +28,7 @@
             color: white;
             font-family: 'Segoe UI', Tahoma, sans-serif;
             overflow: hidden;
-            touch-action: none; /* Bloqueia o "puxar para atualizar" do navegador */
+            touch-action: none;
         }
 
         .header {
@@ -57,17 +56,15 @@
         .btn-pause { background: #f39c12; box-shadow: 0 3px #a3690b; }
         .btn-reset { background: #e74c3c; box-shadow: 0 3px #962d22; }
 
-        /* Seletor de Animais - CORRIGIDO O SCROLL */
         .animal-selector {
             width: 100%;
             padding: 10px;
             background: #2a2a2a;
             display: flex;
             gap: 12px;
-            overflow-x: auto; /* Permite scroll horizontal */
+            overflow-x: auto;
             border-bottom: 1px solid #444;
-            touch-action: pan-x; /* Libera o dedo para deslizar apenas aqui */
-            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
         }
        
         .animal-selector button {
@@ -80,7 +77,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
 
         .stats {
@@ -102,23 +98,9 @@
             position: relative;
         }
 
-        /* TAMANHOS: Predador vs Presa */
         .cell { position: relative; display: flex; align-items: center; justify-content: center; }
-       
-        /* O Predador (Snake) agora é maior */
-        .snake-part {
-            font-size: 22px; /* Aumentado */
-            position: absolute;
-            z-index: 2;
-        }
-       
-        /* A Presa (Comida) agora é menor */
-        .food-item {
-            font-size: 14px; /* Reduzido */
-            position: absolute;
-            z-index: 1;
-            animation: pulse 1s infinite;
-        }
+        .snake-part { font-size: 22px; position: absolute; z-index: 2; }
+        .food-item { font-size: 14px; position: absolute; z-index: 1; animation: pulse 1s infinite; }
 
         @keyframes pulse {
             0% { transform: scale(1); opacity: 0.8; }
@@ -126,35 +108,52 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* Direcional */
-        .controls-area {
+        .controls-container {
             margin-top: auto;
-            margin-bottom: 30px;
-            position: relative;
-            width: 170px;
-            height: 170px;
-            touch-action: none;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
         }
+
+        .dpad { position: relative; width: 130px; height: 130px; }
 
         .dbtn {
             position: absolute;
-            width: 58px;
-            height: 58px;
+            width: 45px;
+            height: 45px;
             background: #333;
-            border: 2px solid #666;
+            border: 2px solid #555;
             color: white;
-            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 18px;
+            border-radius: 8px;
             box-shadow: 0 4px #000;
         }
 
-        .up { top: 0; left: 56px; }
-        .down { bottom: 0; left: 56px; }
-        .left { top: 56px; left: 0; }
-        .right { top: 56px; right: 0; }
+        .up { top: 0; left: 42px; }
+        .down { bottom: 0; left: 42px; }
+        .left { top: 42px; left: 0; }
+        .right { top: 42px; right: 0; }
+
+        .run-btn {
+            width: 70px;
+            height: 70px;
+            background: #e74c3c;
+            border: 4px solid #c0392b;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 5px #8e1e14;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         #game-over {
             position: absolute;
@@ -165,10 +164,11 @@
             align-items: center;
             justify-content: center;
             z-index: 200;
+            border-radius: 5px;
         }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
     <div class="header">
         <button class="btn-top btn-pause" id="pauseBtn" onclick="togglePause()">PAUSE</button>
@@ -179,68 +179,78 @@
     <div class="animal-selector" id="menu"></div>
 
     <div class="stats">
-        Pontos: <span id="score">0</span> | Nível: <span id="level">1</span>
+        PONTOS: <span id="score">0</span> | NÍVEL: <span id="level">1</span>
     </div>
 
     <div style="position: relative;">
         <div id="game-board"></div>
-        <div id="game-over">
-            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
-            <p>Score: <span id="finalScore">0</span></p>
-            <button class="btn-top btn-pause" onclick="resetGame()">REINICIAR</button>
+        <div id="game-over" id="gameOverScreen">
+            <h2 style="color: #e74c3c; margin-bottom: 10px;">FIM DE JOGO!</h2>
+            <p style="font-size: 20px; margin-bottom: 20px;">Score: <span id="finalScore">0</span></p>
+            <button class="btn-top btn-pause" onclick="resetGame()">REINICIAR JOGO</button>
         </div>
     </div>
 
-    <div class="controls-area">
-        <div class="dbtn up" data-dir="up">▲</div>
-        <div class="dbtn left" data-dir="left">◀</div>
-        <div class="dbtn right" data-dir="right">▶</div>
-        <div class="dbtn down" data-dir="down">▼</div>
+    <div class="controls-container">
+        <div class="dpad">
+            <div class="dbtn up" data-dir="up">▲</div>
+            <div class="dbtn left" data-dir="left">◀</div>
+            <div class="dbtn right" data-dir="right">▶</div>
+            <div class="dbtn down" data-dir="down">▼</div>
+        </div>
+        <div class="action-area">
+            <div class="run-btn" id="runBtn">B</div>
+        </div>
     </div>
 
     <script>
         const board = document.getElementById('game-board');
         const menu = document.getElementById('menu');
-       
         const animalData = {
             '👨': { f: '🌭', b: '🟦' }, '🚘': { f: '⛽', b:'🟥' }, '👶': { f: '🍼', b: '❄️' },
             '🐶': { f: '🦴', b: '🟫' }, '🐱': { f: '🐭', b: '🟧' }, '🦁': { f: '🥩', b: '🟨' },
             '🐯': { f: '🥩', b: '🟧' }, '🐺': { f: '🥩', b: '⬜' }, '🐸': { f: '🪰', b: '🟩' },
-            '🐻': { f: '🐟', b: '🟫' }, '🛵': { f: '📦', b: '🟨' }, '🐨': { f: '🌿', b: '⬜' },
+            '🐻': { f: '🐟', b: '🟫' }, '🐻‍❄️': { f: '🐟', b: '⬜' }, '🐨': { f: '🌿', b: '⬜' },
             '🐼': { f: '🎋', b: '⬜' }, '🐹': { f: '🌻', b: '🟧' }, '🐰': { f: '🥕', b: '⬜' },
             '🦊': { f: '🍗', b: '🟧' }, '🐮': { f: '🌿', b: '⬜' }, '🐷': { f: '🍎', b: '🌸' },
             '🐵': { f: '🍌', b: '🟫' }, '🐲': { f: '🔥', b: '🟥' }, '🐭': { f: '🧀', b: '⬜' },
             '😾': { f: '🐭', b: '🟧' }
         };
 
-        let currentAnimal = '👨', snake = [{x: 10, y: 10}], food = {x: 5, y: 5};
-        let direction = {x: 0, y: 0}, lastDir = {x: 0, y: 0};
-        let score = 0, level = 1, speed = 250, isPaused = false, isGameOver = false;
+        let currentAnimal = '👨', snake, food, direction, lastDir, score, level, speed, isPaused, isGameOver, isRunning, gameTimeout;
 
-        // Criar Menu com suporte a clique e toque
+        function initVars() {
+            snake = [{x: 10, y: 10}];
+            direction = {x: 0, y: 0};
+            lastDir = {x: 0, y: 0};
+            score = 0;
+            level = 1;
+            speed = 250;
+            isPaused = false;
+            isGameOver = false;
+            isRunning = false;
+            document.getElementById('score').innerText = "0";
+            document.getElementById('level').innerText = "1";
+            document.getElementById('pauseBtn').innerText = "PAUSE";
+            document.getElementById('game-over').style.display = 'none';
+        }
+
         Object.keys(animalData).forEach(emoji => {
             const btn = document.createElement('button');
             btn.innerText = emoji;
-            const selectAnimal = (e) => {
-                e.stopPropagation();
-                currentAnimal = emoji;
-                resetGame();
-            };
-            btn.addEventListener('click', selectAnimal);
-            btn.addEventListener('touchstart', (e) => e.stopPropagation()); // Deixa o scroll fluir
+            btn.onclick = () => { currentAnimal = emoji; resetGame(); };
             menu.appendChild(btn);
         });
 
-        // Controles de Direção
         document.querySelectorAll('.dbtn').forEach(btn => {
-            const handleDirection = (e) => {
-                e.preventDefault();
-                const d = btn.getAttribute('data-dir');
-                changeDir(d);
-            };
-            btn.addEventListener('touchstart', handleDirection, {passive: false});
-            btn.addEventListener('mousedown', handleDirection);
+            const handle = (e) => { e.preventDefault(); changeDir(btn.getAttribute('data-dir')); };
+            btn.addEventListener('touchstart', handle);
+            btn.addEventListener('mousedown', handle);
         });
+
+        const runBtn = document.getElementById('runBtn');
+        runBtn.onpointerdown = (e) => { e.preventDefault(); isRunning = true; };
+        runBtn.onpointerup = (e) => { e.preventDefault(); isRunning = false; };
 
         function changeDir(dir) {
             if (isPaused || isGameOver) return;
@@ -252,48 +262,41 @@
 
         function createBoard() {
             board.innerHTML = '';
-            const config = animalData[currentAnimal] || animalData['👨'];
+            const config = animalData[currentAnimal];
             for (let y = 0; y < 20; y++) {
                 for (let x = 0; x < 20; x++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-                    if (x === food.x && y === food.y) {
-                        cell.innerHTML = `<span class="food-item">${config.f}</span>`;
-                    } else {
-                        const partIdx = snake.findIndex(p => p.x === x && p.y === y);
-                        if (partIdx !== -1) {
-                            cell.innerHTML = `<span class="snake-part">${partIdx === 0 ? currentAnimal : config.b}</span>`;
-                        }
-                    }
+                    if (x === food.x && y === food.y) cell.innerHTML = `<span class="food-item">${config.f}</span>`;
+                    const partIdx = snake.findIndex(p => p.x === x && p.y === y);
+                    if (partIdx !== -1) cell.innerHTML = `<span class="snake-part">${partIdx === 0 ? currentAnimal : config.b}</span>`;
                     board.appendChild(cell);
                 }
             }
         }
 
         function update() {
-            if (!isPaused && !isGameOver && (direction.x !== 0 || direction.y !== 0)) {
+            if (isGameOver) return;
+            if (!isPaused && (direction.x !== 0 || direction.y !== 0)) {
                 lastDir = direction;
                 const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-
-                if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 ||
-                    snake.find(p => p.x === head.x && p.y === head.y)) {
+                if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.find(p => p.x === head.x && p.y === head.y)) {
                     isGameOver = true;
                     document.getElementById('finalScore').innerText = score;
                     document.getElementById('game-over').style.display = 'flex';
                     return;
                 }
-
                 snake.unshift(head);
                 if (head.x === food.x && head.y === food.y) {
                     score += 10;
-                    if (score % 30 === 0) { level++; speed = Math.max(70, speed - 20); }
+                    if (score % 30 === 0) { level++; speed = Math.max(60, speed - 15); }
                     document.getElementById('score').innerText = score;
                     document.getElementById('level').innerText = level;
                     generateFood();
                 } else { snake.pop(); }
             }
             createBoard();
-            setTimeout(update, speed);
+            gameTimeout = setTimeout(update, isRunning ? speed / 2.5 : speed);
         }
 
         function generateFood() {
@@ -302,20 +305,19 @@
         }
 
         function togglePause() {
+            if (isGameOver) return;
             isPaused = !isPaused;
-            document.getElementById('pauseBtn').innerText = isPaused ? "VOLTAR" : "PAUSE";
+            document.getElementById('pauseBtn').innerText = isPaused ? "CONTINUAR" : "PAUSE";
         }
 
         function resetGame() {
-            snake = [{x: 10, y: 10}]; direction = {x: 0, y: 0}; lastDir = {x: 0, y: 0};
-            score = 0; level = 1; speed = 250; isPaused = false; isGameOver = false;
-            document.getElementById('score').innerText = "0";
-            document.getElementById('level').innerText = "1";
-            document.getElementById('game-over').style.display = 'none';
+            clearTimeout(gameTimeout);
+            initVars();
             generateFood();
-            createBoard();
+            update();
         }
 
+        initVars();
         generateFood();
         update();
     </script>
